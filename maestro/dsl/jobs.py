@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from abc import ABC
+from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -22,15 +22,16 @@ _JOB_RESERVED_FIELDS = {
 }
 
 
+@dataclass
 class JobBase(ABC):
     """Base class for all job types."""
-    id: str
+    id: str = field(repr=True, kw_only=True)
     _name: str | None = field(default=None, repr=True)
     _description: str | None = field(default=None, repr=True)
     _failure_mode: str | None = field(default=None, repr=True)
-    _tags: list[str] = field(default=list, repr=True)
+    _tags: list[str] = field(default_factory=list, repr=True)
     _timeout: str | None = field(default=None, repr=True)
-    _transition: list[str] = field(default=list, repr=True)
+    _transition: list[str] = field(default_factory=list, repr=True)
     _job_params: dict[str, Any] = field(default_factory=dict, repr=False)
 
     def name(self, name: str) -> Self:
@@ -124,6 +125,9 @@ class JobBase(ABC):
             if value is not None:
                 result[key] = value
 
+    def to_dict(self) -> dict[str, Any]:
+        """Serialize a job to dict. Must be implemented by subclasses. """
+
 
 @dataclass
 class Job(JobBase):
@@ -134,8 +138,8 @@ class Job(JobBase):
         >>> Job(id="job1", type="shell")
         >>> Job(id="job1", type="shell").type_version("v1")
     """
-    type: str  # job template type id
-    _type_version: str | None = field(default=None, kw_only=True)
+    type: str = field(kw_only=True, repr=True)  # job template type id
+    _type_version: str | None = field(default=None, repr=True)
 
     def type_version(self, version: str) -> Self:
         """Set job template type version."""
@@ -163,10 +167,10 @@ class Subworkflow(JobBase):
         >>> Subworkflow(id="job1")
         >>> Subworkflow(id="job1").workflow_id("child").version("v1")
     """
-    _workflow_id: str | None = field(default=None, kw_only=True)
-    _workflow_version: str | None = field(default=None, kw_only=True)
-    _sync: bool | None = field(default=None, kw_only=True)
-    _explicit_params: bool | None = field(default=None, kw_only=True)
+    _workflow_id: str | None = field(default=None, repr=True)
+    _workflow_version: str | None = field(default=None, repr=True)
+    _sync: bool | None = field(default=None, repr=True)
+    _explicit_params: bool | None = field(default=None, repr=True)
 
     def workflow_id(self, workflow_id: str) -> Self:
         """Set subworkflow workflow id."""
@@ -200,11 +204,12 @@ class Subworkflow(JobBase):
         return {"subworkflow": result}
 
 
+@dataclass
 class LoopBase(JobBase, ABC):
     """Base ABC loop job for foreach and while."""
-    _loop_params: dict[str, Any] = field(default=dict, repr=False, kw_only=True)
-    _jobs: list[Any] = field(default=list, kw_only=True)
-    _dag: str | dict[str, Any] | None = field(default=None, kw_only=True)
+    _loop_params: dict[str, Any] = field(default_factory=dict, repr=True)
+    _jobs: list[Any] = field(default_factory=list, repr=True)
+    _dag: str | dict[str, Any] | None = field(default=None, repr=True)
 
     def loop_param(self, name: str, value: Any) -> Self:
         """
@@ -283,8 +288,8 @@ class Foreach(LoopBase):
         >>> Foreach(id="job1").loop_param("foo", [1, 2, 3])
         >>> Foreach(id="job1").range("i", 0, 10)
     """
-    _concurrency: int | None = field(default=None, kw_only=True)
-    _ranges: dict[str, tuple[int | None, int, int | None]] = field(default=dict, repr=False, kw_only=True)
+    _concurrency: int | None = field(default=None, repr=True)
+    _ranges: dict[str, tuple[int | None, int, int | None]] = field(default_factory=dict, repr=True)
 
     def concurrency(self, concurrency: int) -> Self:
         """Set foreach loop iteration concurrency."""
@@ -328,7 +333,7 @@ class While(LoopBase):
         >>> While(id="job1").condition("x < 0")
         >>> While(id="job1").condition("x > 0").loop_param("x", 1)
     """
-    _condition: str | None = field(default=None, kw_only=True)
+    _condition: str | None = field(default=None, repr=True)
 
     def condition(self, condition: str) -> Self:
         """Set while loop iteration condition, which is defined using a SEL expression."""

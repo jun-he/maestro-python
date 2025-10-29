@@ -61,8 +61,8 @@ class Workflow:
     _workflow_concurrency: int | None = field(default=None, repr=True)
     _timeout: str | None = field(default=None, repr=True)
     _criticality: str | None = field(default=None, repr=True)
-    _tags: list[str] = field(default=list, repr=True)
-    _jobs: list[Any] = field(default=list, repr=True)
+    _tags: list[str] = field(default_factory=list, repr=True)
+    _jobs: list[Any] = field(default_factory=list, repr=True)
     _dag: str | dict[str, Any] | None = field(default=None, repr=True)
     _workflow_params: dict[str, Any] = field(default_factory=dict, repr=False)
 
