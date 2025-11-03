@@ -125,6 +125,7 @@ class JobBase(ABC):
             if value is not None:
                 result[key] = value
 
+    @abstractmethod
     def to_dict(self) -> dict[str, Any]:
         """Serialize a job to dict. Must be implemented by subclasses. """
 

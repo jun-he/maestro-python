@@ -16,17 +16,20 @@ classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: Apache Software License",
-    "Programming Languange :: Python :: 3",
-    "Programming Languange :: Python :: 3.10",
-    "Programming Languange :: Python :: 3.11",
-    "Programming Languange :: Python :: 3.12",
-    "Programming Languange :: Python :: 3.13",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Typing :: Typed",
 ]
 dependencies = [
     "pyyaml>=6.0",
 ]
 keywords = ["maestro", "workflow", "orchestration", "SDK", "DSL"]
+
+[project.scripts]
+maestro = "maestro.cli.cli:cli"
 
 [project.optional-dependencies]
 dev = [
