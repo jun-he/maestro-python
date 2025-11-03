@@ -91,7 +91,7 @@ class JobBase(ABC):
         if name in _JOB_RESERVED_FIELDS:
             raise NameError(
                 f"Param name '{name}' conflicts with one of reserved job fields."
-                f"Reserved fields are: ${_JOB_RESERVED_FIELDS}."
+                f"Reserved fields are: '{_JOB_RESERVED_FIELDS}'."
             )
         self._job_params[name] = value
         return self
@@ -209,7 +209,7 @@ class Subworkflow(JobBase):
 class LoopBase(JobBase, ABC):
     """Base ABC loop job for foreach and while."""
     _loop_params: dict[str, Any] = field(default_factory=dict, repr=True)
-    _jobs: list[Any] = field(default_factory=list, repr=True)
+    _jobs: list[JobBase] = field(default_factory=list, repr=True)
     _dag: str | dict[str, Any] | None = field(default=None, repr=True)
 
     def loop_param(self, name: str, value: Any) -> Self:
@@ -234,7 +234,7 @@ class LoopBase(JobBase, ABC):
         """
         Add a SEL expression defined loop param .
         """
-        return self.param(f"!{name}", expr)
+        return self.loop_param(f"!{name}", expr)
 
     def job(self, job: JobBase) -> Self:
         """Add a nested job to the foreach iteration."""

@@ -50,7 +50,7 @@ class Workflow:
         >>> wf = Workflow(id="test-wf")
         >>> wf.owner("tester").tags("test")
         >>> wf.job(Job(id="job1", type='NoOp'))
-        >>> wf_yaml wf.to_yaml()
+        >>> wf_yaml = wf.to_yaml()
     """
 
     id: str
@@ -62,7 +62,7 @@ class Workflow:
     _timeout: str | None = field(default=None, repr=True)
     _criticality: str | None = field(default=None, repr=True)
     _tags: list[str] = field(default_factory=list, repr=True)
-    _jobs: list[Any] = field(default_factory=list, repr=True)
+    _jobs: list[JobBase] = field(default_factory=list, repr=True)
     _dag: str | dict[str, Any] | None = field(default=None, repr=True)
     _workflow_params: dict[str, Any] = field(default_factory=dict, repr=False)
 
