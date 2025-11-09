@@ -151,8 +151,8 @@ class MaestroClient:
         """
         return self._send_yaml("PUT", f"/api/v3/workflows/actions/validate/yaml", yaml_str)
 
-    def start(self, workflow_id: str, version: str = "default",
-              initiator: dict[str, Any] | None = None, run_params: dict[str, dict[str, Any]] | None = None):
+    def start(self, workflow_id: str, version: str = "default", initiator: dict[str, Any] | None = None,
+              run_params: dict[str, dict[str, Any]] | None = None) -> dict[str, Any]:
         """
         Start a workflow execution.
 
@@ -177,3 +177,42 @@ class MaestroClient:
 
         payload_bytes = json.dumps(payload).encode("utf-8")
         return self._make_request("POST", path, headers, payload_bytes)
+
+    def get_workflow(self, workflow_id: str, version: str = "default", enriched: bool = False) -> dict[str, Any]:
+        """
+        Start a workflow execution.
+
+        :param workflow_id: workflow id to get
+        :param version: workflow version, e.g. default, latest, 1, etc.
+        :param enriched: flag to indicate whether enriching the defintion to return extra info
+        :return: the workflow definition.
+
+        Example:
+            >>> from maestro import Workflow, Job, MaestroClient
+            >>> client = MaestroClient(base_url="http://127.0.0.1:8080", user="tester")
+            >>> response = client.get_workflow(workflow_id="sample-wf", version='latest')
+        """
+        headers = {"user": self.user, "Content-Type": "application/json"}
+        path = f"/api/v3/workflows/{workflow_id}/versions/{version}?enriched={enriched}"
+
+        return self._make_request("GET", path, headers)
+
+    def get_instance(self, workflow_id: str, instance_id: int, step_id: str | None = None) -> dict[str, Any]:
+        """
+        Start a workflow execution.
+
+        :param workflow_id: workflow id to get
+        :param instance_id: workflow instance id to get
+        :param step_id: if absent, return workflow instance, otherwise, return step instance
+        :return: the workflow instance or step instance info.
+
+        Example:
+            >>> from maestro import Workflow, Job, MaestroClient
+            >>> client = MaestroClient(base_url="http://127.0.0.1:8080", user="tester")
+            >>> response = client.get_instance(workflow_id="sample-wf", instance_id=1)
+        """
+        headers = {"user": self.user, "Content-Type": "application/json"}
+        path = f"/api/v3/workflows/{workflow_id}/instances/{instance_id}" if step_id is None \
+            else f"/api/v3/workflows/{workflow_id}/instances/{instance_id}/steps/{step_id}"
+
+        return self._make_request("GET", path, headers)

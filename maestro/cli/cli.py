@@ -39,6 +39,23 @@ def start_command(args: argparse.Namespace) -> None:
     print(json.dumps(resp, indent=2))
 
 
+def get_workflow_command(args: argparse.Namespace) -> None:
+    client = MaestroClient(base_url=args.base_url, user=args.user)
+    resp = client.get_workflow(workflow_id=args.workflow_id, version=args.version)
+    print(json.dumps(resp, indent=2))
+
+
+def get_instance_command(args: argparse.Namespace) -> None:
+    if args.instance_id is None:
+        instance_id = None
+    else:
+        instance_id = int(args.instance_id)
+
+    client = MaestroClient(base_url=args.base_url, user=args.user)
+    resp = client.get_instance(workflow_id=args.workflow_id, instance_id=instance_id, step_id=args.step_id)
+    print(json.dumps(resp, indent=2))
+
+
 def cli() -> None:
     """Main CLI entry point. """
     parser = argparse.ArgumentParser(
@@ -83,8 +100,30 @@ def cli() -> None:
         "--params",
         help='Runtime params in Maestro param JSON format (e.g. \'{"foo": {"value": "bar", "type": "STRING"}}\'',
     )
-
     start_parser.set_defaults(func=start_command)
+
+    get_workflow_parser = subparsers.add_parser(name="get-workflow",
+                                                help="Get a workflow definition in Maestro JSON format")
+    get_workflow_parser.add_argument("workflow_id", help="workflow id to get its definition")
+    get_workflow_parser.add_argument(
+        "--version",
+        default="default",
+        help="Workflow version to get its definition",
+    )
+    get_workflow_parser.set_defaults(func=get_workflow_command)
+
+    get_instance_parser = subparsers.add_parser(name="get-instance",
+                                                help="Get a workflow instance or step instance in Maestro JSON format")
+    get_instance_parser.add_argument("workflow_id", help="workflow id to get its instance data")
+    get_instance_parser.add_argument(
+        "instance_id",
+        help="Workflow instance id to get its instance data",
+    )
+    get_instance_parser.add_argument(
+        "step_id",
+        help="Workflow step id to get its step instance data",
+    )
+    get_instance_parser.set_defaults(func=get_instance_command)
 
     args = parser.parse_args()
 

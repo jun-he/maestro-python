@@ -1,5 +1,6 @@
 # maestro-python
 Python sdk client library for [Maestro workflow orchestrator](https://github.com/Netflix/maestro).
+It has a minimal dependency, only requiring pyyaml.
 
 ## Features
  
@@ -78,7 +79,7 @@ maestro --base-url http://127.0.0.1:8080 --user tester validate sample-wf.yaml
 maestro validate sample-wf.yaml
 ```
 
-### Start a workflow
+### Start a workflow definition
 
 ```bash
 # start sample-wf with default version and none runtime params
@@ -87,4 +88,16 @@ maestro --base-url http://127.0.0.1:8080 --user tester start sample-wf.yaml
 maestro start sample-wf --version 1 --params '{"foo": {"value": "bar", "type": "STRING"}}'
 # start sample-wf with default base-url & user name and runtime params using the latest version
 maestro start sample-wf --version latest --params '{"foo": {"value": "bar", "type": "STRING"}}'
+```
+
+### Get a workflow instance or step instance
+```bash
+maestro --base-url http://127.0.0.1:8080 --user tester start sample-wf.yaml
+# get workflow definition for version 1
+maestro get-workflow sample-wf --version 1
+maestro start sample-wf --version 1 --params '{"foo": {"value": "bar", "type": "STRING"}}'
+# get workflow instance for instance id 1
+maestro get-instance sample-wf 1
+# get workflow step instance for instance id = 1 and step id = job1
+maestro get-instance sample-wf 1 --step-id job1
 ```
