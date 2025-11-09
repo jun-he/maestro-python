@@ -39,6 +39,16 @@ def start_command(args: argparse.Namespace) -> None:
     print(json.dumps(resp, indent=2))
 
 
+def stop_command(args: argparse.Namespace) -> None:
+    if args.instance_id is None:
+        instance_id = None
+    else:
+        instance_id = int(args.instance_id)
+    client = MaestroClient(base_url=args.base_url, user=args.user)
+    resp = client.stop(workflow_id=args.workflow_id, instance_id=instance_id, step_id=args.step_id)
+    print(json.dumps(resp, indent=2))
+
+
 def get_workflow_command(args: argparse.Namespace) -> None:
     client = MaestroClient(base_url=args.base_url, user=args.user)
     resp = client.get_workflow(workflow_id=args.workflow_id, version=args.version)
@@ -46,11 +56,7 @@ def get_workflow_command(args: argparse.Namespace) -> None:
 
 
 def get_instance_command(args: argparse.Namespace) -> None:
-    if args.instance_id is None:
-        instance_id = None
-    else:
-        instance_id = int(args.instance_id)
-
+    instance_id = int(args.instance_id)
     client = MaestroClient(base_url=args.base_url, user=args.user)
     resp = client.get_instance(workflow_id=args.workflow_id, instance_id=instance_id, step_id=args.step_id)
     print(json.dumps(resp, indent=2))
@@ -102,6 +108,21 @@ def cli() -> None:
     )
     start_parser.set_defaults(func=start_command)
 
+    stop_parser = subparsers.add_parser(name="stop",
+                                        help="Stop workflow or step execution(s)")
+    stop_parser.add_argument("workflow_id", help="workflow id to stop its workflow instances")
+    stop_parser.add_argument(
+        "instance_id",
+        nargs='?',
+        help="Workflow instance id to stop it",
+    )
+    stop_parser.add_argument(
+        "step_id",
+        nargs='?',
+        help="Workflow step id to stop it",
+    )
+    stop_parser.set_defaults(func=stop_command)
+
     get_workflow_parser = subparsers.add_parser(name="get-workflow",
                                                 help="Get a workflow definition in Maestro JSON format")
     get_workflow_parser.add_argument("workflow_id", help="workflow id to get its definition")
@@ -121,6 +142,7 @@ def cli() -> None:
     )
     get_instance_parser.add_argument(
         "step_id",
+        nargs='?',
         help="Workflow step id to get its step instance data",
     )
     get_instance_parser.set_defaults(func=get_instance_command)

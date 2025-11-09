@@ -178,13 +178,40 @@ class MaestroClient:
         payload_bytes = json.dumps(payload).encode("utf-8")
         return self._make_request("POST", path, headers, payload_bytes)
 
+    def stop(self, workflow_id: str, instance_id: int | None = None, step_id: str | None = None) -> dict[str, Any]:
+        """
+        Stop workflow execution(s).
+        If only workflow_id is provided, stop all workflow instances of the given workflow id.
+        If only workflow_id and instance_id are provided, stop a given workflow instance.
+        If workflow_id, instance_id, and step_id are provided, stop a given step instance.
+
+        :param workflow_id: workflow id to stop
+        :param instance_id: if present, workflow instance id to stop
+        :param step_id: if present, stop a given step instance
+        :return: stop action response from maestro server.
+
+        Example:
+            >>> from maestro import Workflow, Job, MaestroClient
+            >>> client = MaestroClient(base_url="http://127.0.0.1:8080", user="tester")
+            >>> response = client.get_instance(workflow_id="sample-wf", instance_id=1)
+        """
+        headers = {"user": self.user, "Content-Type": "application/json"}
+        if instance_id is None:
+            path = f"/api/v3/workflows/{workflow_id}/actions/stop"
+        elif step_id is None:
+            path = f"/api/v3/workflows/{workflow_id}/instances/{instance_id}/actions/stop"
+        else:
+            path = f"/api/v3/workflows/{workflow_id}/instances/{instance_id}/steps/{step_id}/actions/stop"
+
+        return self._make_request("PUT", path, headers)
+
     def get_workflow(self, workflow_id: str, version: str = "default", enriched: bool = False) -> dict[str, Any]:
         """
-        Start a workflow execution.
+        Get a workflow definition.
 
         :param workflow_id: workflow id to get
         :param version: workflow version, e.g. default, latest, 1, etc.
-        :param enriched: flag to indicate whether enriching the defintion to return extra info
+        :param enriched: flag to indicate whether enriching the definition to return extra info
         :return: the workflow definition.
 
         Example:
@@ -199,7 +226,7 @@ class MaestroClient:
 
     def get_instance(self, workflow_id: str, instance_id: int, step_id: str | None = None) -> dict[str, Any]:
         """
-        Start a workflow execution.
+        Get a workflow instance or a step instance (if step id is provided).
 
         :param workflow_id: workflow id to get
         :param instance_id: workflow instance id to get

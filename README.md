@@ -90,14 +90,31 @@ maestro start sample-wf --version 1 --params '{"foo": {"value": "bar", "type": "
 maestro start sample-wf --version latest --params '{"foo": {"value": "bar", "type": "STRING"}}'
 ```
 
-### Get a workflow instance or step instance
+### Stop workflow or step execution(s)
+```bash
+maestro --base-url http://127.0.0.1:8080 --user tester start sample-wf.yaml
+maestro start sample-wf --version 1 --params '{"foo": {"value": "bar", "type": "STRING"}}'
+# stop all workflow instances for workflow_id = sample-wf
+maestro stop sample-wf
+# stop a workflow instance for workflow_id = sample-wf and instance_id = 1
+maestro stop sample-wf 1
+# stop a step instance for workflow_id = sample-wf and instance_id = 1 and step_id = job1
+maestro stop sample-wf 1 job1
+```
+
+### Get a workflow definition
 ```bash
 maestro --base-url http://127.0.0.1:8080 --user tester start sample-wf.yaml
 # get workflow definition for version 1
 maestro get-workflow sample-wf --version 1
+```
+
+### Get a workflow instance or step instance
+```bash
+maestro --base-url http://127.0.0.1:8080 --user tester start sample-wf.yaml
 maestro start sample-wf --version 1 --params '{"foo": {"value": "bar", "type": "STRING"}}'
 # get workflow instance for instance id 1
 maestro get-instance sample-wf 1
 # get workflow step instance for instance id = 1 and step id = job1
-maestro get-instance sample-wf 1 --step-id job1
+maestro get-instance sample-wf 1 job1
 ```
