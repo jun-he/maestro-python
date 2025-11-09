@@ -44,6 +44,7 @@ def stop_command(args: argparse.Namespace) -> None:
         instance_id = None
     else:
         instance_id = int(args.instance_id)
+
     client = MaestroClient(base_url=args.base_url, user=args.user)
     resp = client.stop(workflow_id=args.workflow_id, instance_id=instance_id, step_id=args.step_id)
     print(json.dumps(resp, indent=2))
@@ -58,7 +59,8 @@ def get_workflow_command(args: argparse.Namespace) -> None:
 def get_instance_command(args: argparse.Namespace) -> None:
     instance_id = int(args.instance_id)
     client = MaestroClient(base_url=args.base_url, user=args.user)
-    resp = client.get_instance(workflow_id=args.workflow_id, instance_id=instance_id, step_id=args.step_id)
+    resp = client.get_instance(workflow_id=args.workflow_id, instance_id=instance_id, run_id=args.run_id,
+                               step_id=args.step_id, attempt_id=args.attempt_id)
     print(json.dumps(resp, indent=2))
 
 
@@ -110,16 +112,17 @@ def cli() -> None:
 
     stop_parser = subparsers.add_parser(name="stop",
                                         help="Stop workflow or step execution(s)")
-    stop_parser.add_argument("workflow_id", help="workflow id to stop its workflow instances")
+    stop_parser.add_argument("workflow_id",
+                             help="workflow id to stop. If instance_id is absent, stop all its instances.")
     stop_parser.add_argument(
         "instance_id",
         nargs='?',
-        help="Workflow instance id to stop it",
+        help="(Optional) Workflow instance id to stop a specific instance",
     )
     stop_parser.add_argument(
         "step_id",
         nargs='?',
-        help="Workflow step id to stop it",
+        help="(Optional) Workflow step id to stop a specific step instance",
     )
     stop_parser.set_defaults(func=stop_command)
 
@@ -144,6 +147,16 @@ def cli() -> None:
         "step_id",
         nargs='?',
         help="Workflow step id to get its step instance data",
+    )
+    get_instance_parser.add_argument(
+        "--run-id",
+        default=None,
+        help="Workflow instance run id to get its workflow instance data",
+    )
+    get_instance_parser.add_argument(
+        "--attempt-id",
+        default=None,
+        help="Workflow step attempt id to get its step instance data",
     )
     get_instance_parser.set_defaults(func=get_instance_command)
 

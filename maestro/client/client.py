@@ -193,10 +193,12 @@ class MaestroClient:
         Example:
             >>> from maestro import Workflow, Job, MaestroClient
             >>> client = MaestroClient(base_url="http://127.0.0.1:8080", user="tester")
-            >>> response = client.get_instance(workflow_id="sample-wf", instance_id=1)
+            >>> response = client.stop(workflow_id="sample-wf", instance_id=1)
         """
         headers = {"user": self.user, "Content-Type": "application/json"}
         if instance_id is None:
+            if step_id is not None:
+                raise ValueError("Have to specify both instance_id and step_id.")
             path = f"/api/v3/workflows/{workflow_id}/actions/stop"
         elif step_id is None:
             path = f"/api/v3/workflows/{workflow_id}/instances/{instance_id}/actions/stop"
@@ -224,13 +226,16 @@ class MaestroClient:
 
         return self._make_request("GET", path, headers)
 
-    def get_instance(self, workflow_id: str, instance_id: int, step_id: str | None = None) -> dict[str, Any]:
+    def get_instance(self, workflow_id: str, instance_id: int, run_id: int | None = None,
+                     step_id: str | None = None, attempt_id: int | None = None) -> dict[str, Any]:
         """
         Get a workflow instance or a step instance (if step id is provided).
 
         :param workflow_id: workflow id to get
         :param instance_id: workflow instance id to get
+        :param run_id: workflow instance run id to get
         :param step_id: if absent, return workflow instance, otherwise, return step instance
+        :param attempt_id: step attempt id to get
         :return: the workflow instance or step instance info.
 
         Example:
@@ -239,7 +244,19 @@ class MaestroClient:
             >>> response = client.get_instance(workflow_id="sample-wf", instance_id=1)
         """
         headers = {"user": self.user, "Content-Type": "application/json"}
-        path = f"/api/v3/workflows/{workflow_id}/instances/{instance_id}" if step_id is None \
-            else f"/api/v3/workflows/{workflow_id}/instances/{instance_id}/steps/{step_id}"
+        prefix = f"/api/v3/workflows/{workflow_id}/instances/{instance_id}"
+        if step_id is None:
+            if run_id is None:
+                path = prefix
+            else:
+                path = f"{prefix}/runs/{run_id}"
+        else:
+            if run_id is None:
+                path = f"{prefix}/steps/{step_id}"
+            else:
+                if attempt_id is None:
+                    raise ValueError("Have to specify both run_id and attempt_id.")
+                else:
+                    path = f"{prefix}/runs/{run_id}/steps/{step_id}/attempts/{attempt_id}"
 
         return self._make_request("GET", path, headers)
