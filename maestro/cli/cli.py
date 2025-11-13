@@ -6,6 +6,7 @@ import argparse
 import json
 
 from maestro.client.client import MaestroClient
+from maestro.client.watch import watch_workflow
 
 
 def push_command(args: argparse.Namespace) -> None:
@@ -62,6 +63,13 @@ def get_instance_command(args: argparse.Namespace) -> None:
     resp = client.get_instance(workflow_id=args.workflow_id, instance_id=instance_id, run_id=args.run_id,
                                step_id=args.step_id, attempt_id=args.attempt_id)
     print(json.dumps(resp, indent=2))
+
+
+def watch_command(args: argparse.Namespace) -> None:
+    instance_id = int(args.instance_id)
+    poll_interval = int(args.poll_interval)
+    client = MaestroClient(base_url=args.base_url, user=args.user)
+    watch_workflow(client, args.workflow_id, instance_id, poll_interval)
 
 
 def cli() -> None:
@@ -159,6 +167,17 @@ def cli() -> None:
         help="Workflow step attempt id to get its step instance data",
     )
     get_instance_parser.set_defaults(func=get_instance_command)
+
+    watch_parser = subparsers.add_parser(name="watch",
+                                         help="Watch a workflow instance execution and show step status changes")
+    watch_parser.add_argument("workflow_id", help="workflow id to watch")
+    watch_parser.add_argument("instance_id", help="Workflow instance id to watch")
+    watch_parser.add_argument(
+        "--poll-interval",
+        default=2,
+        help="Polling interval in seconds (defaults to 2 seconds)",
+    )
+    watch_parser.set_defaults(func=watch_command)
 
     args = parser.parse_args()
 

@@ -123,3 +123,17 @@ maestro get-instance sample-wf 1 job1
 # get workflow step instance for instance id = 1, run id = 2, step id = job1, step attempt id = 1 
 maestro get-instance sample-wf 1 job1 --run-id 2 --attempt-id 1
 ```
+
+### Watch a workflow instance execution
+```bash
+>>> maestro watch wf-test 5
+Watching workflow instance [wf-test][5]...
+-> Current workflow status: [IN_PROGRESS]
+--------------------------------------------------
+.
+[01:06:26]: job1 -> RUNNING
+..
+[01:06:32]: job1 -> SUCCEEDED
+--------------------------------------------------
+* Workflow instance [wf-test][5] is completed with status [SUCCEEDED]
+```
